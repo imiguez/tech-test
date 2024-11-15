@@ -1,0 +1,30 @@
+services:
+  backend:
+    build:
+      context: .
+    ports:
+    - "3000:3000"
+    depends_on:
+      - db
+
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_DB=tech-test-db
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+    ports:
+      - "5432:5432"
+    volumes:
+      - app:/var/lib/postgresql/data
+ 
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+
+volumes:
+  app:
