@@ -30,7 +30,9 @@ body: {
 	password: "123456"
 }
 ```
-By default this user has 'Course 1' completed and 'Course 2' in progress. Database information could be accessible through an adminer instance. Credentials are in .env file.
+By default this user has 'Course 1' completed and 'Course 2' in progress. 
+Database information could be accessible through an adminer instance. Credentials are in .env file.
+This is IMPORTANT to get generated ids easier and use them in the next requests.
 ```
 url: localhost:8080
 ```

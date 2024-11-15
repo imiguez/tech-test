@@ -34,7 +34,7 @@ import { UsersCourses } from './users_courses/entities/users_courses.entity';
           database: configService.get<string>('database'),
           entities: [User, Course, UsersCourses],
           autoLoadEntities: true,
-          synchronize: configService.get<string>('env') === 'dev',
+          synchronize: true, // configService.get<string>('env') === 'dev', // This should be used in real projects.
         };
       },
     }),

@@ -23,25 +23,18 @@ export class AuthService {
     private usersRepository: Repository<User>,
     private fb: FirebaseService,
   ) {
-    const password = '123456';
     const authDto = new CreateAuthDto();
     authDto.email = 'test@gmail.com';
-    authDto.password = password;
-    this.usersRepository.findOneBy({ email: authDto.email }).then((user) => {
-      if (!user) {
-        this.signUp(authDto)
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          .then((response) => {
-            console.log(
-              `User ${authDto.email} with password ${password} created.`,
-            );
-          });
-      } else {
-        console.log(
-          `User ${authDto.email} with password ${password} already exists.`,
-        );
+    this.usersRepository.findOneBy({ email: authDto.email }).then(async (user) => {
+      try {
+        if (!user) {
+          authDto.password = await hash('123456', 10);
+          await this.usersRepository.insert(authDto);
+        }
+      } catch (error) {
+        console.log(error);
       }
-    });
+    }).catch((e) => console.log(e));
   }
 
   async signUp(
