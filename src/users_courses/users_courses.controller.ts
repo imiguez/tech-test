@@ -1,11 +1,24 @@
-import { Controller, Get, Post, Body, Put, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Put,
+  Req,
+  UseGuards,
+  HttpCode,
+} from '@nestjs/common';
 import { UsersCoursesService } from './users_courses.service';
 import { CreateUsersCourseDto } from './dto/create-users_course.dto';
 import { UpdateUsersCourseDto } from './dto/update-users_course.dto';
 import { StudyPlanDto } from './dto/study-plan.dt';
 import { Course } from 'src/courses/entities/course.entity';
-import { ReqWithUser } from 'src/auth/guards/firebase.auth.guard';
+import {
+  FirebaseAuthGuard,
+  ReqWithUser,
+} from 'src/auth/guards/firebase.auth.guard';
 
+@UseGuards(FirebaseAuthGuard)
 @Controller('user-courses')
 export class UsersCoursesController {
   constructor(private readonly usersCoursesService: UsersCoursesService) {}
@@ -13,7 +26,7 @@ export class UsersCoursesController {
   @Post()
   async create(
     @Body() createUsersCourseDto: CreateUsersCourseDto,
-  ): Promise<number> {
+  ): Promise<{ userId: string; courseId: string }> {
     return await this.usersCoursesService.create(createUsersCourseDto);
   }
 
@@ -35,9 +48,10 @@ export class UsersCoursesController {
   }
 
   @Put()
+  @HttpCode(201)
   async update(@Body() updateUsersCourseDto: UpdateUsersCourseDto) {
-    const response =
+    const rowsAffected =
       await this.usersCoursesService.update(updateUsersCourseDto);
-    return { updated: !!response.affected };
+    return { updated: !!rowsAffected };
   }
 }

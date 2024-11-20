@@ -70,10 +70,12 @@ export class UsersCoursesService {
       await this.usersCoursesRepository.insert(userCourse2);
   }
 
-  async create(createUsersCourseDto: CreateUsersCourseDto): Promise<number> {
+  async create(
+    createUsersCourseDto: CreateUsersCourseDto,
+  ): Promise<{ userId: string; courseId: string }> {
     try {
       return (await this.usersCoursesRepository.insert(createUsersCourseDto))
-        .identifiers[0].id;
+        .identifiers[0] as { userId: string; courseId: string };
     } catch (error) {
       if (
         error.message &&
@@ -203,15 +205,17 @@ export class UsersCoursesService {
     }
   }
 
-  async update(updateUsersCourseDto: UpdateUsersCourseDto) {
+  async update(updateUsersCourseDto: UpdateUsersCourseDto): Promise<number> {
     try {
-      return await this.usersCoursesRepository.update(
-        {
-          userId: updateUsersCourseDto.userId,
-          courseId: updateUsersCourseDto.courseId,
-        },
-        updateUsersCourseDto,
-      );
+      return (
+        await this.usersCoursesRepository.update(
+          {
+            userId: updateUsersCourseDto.userId,
+            courseId: updateUsersCourseDto.courseId,
+          },
+          updateUsersCourseDto,
+        )
+      ).affected;
     } catch (error) {
       throw new InternalServerErrorException(
         'Error trying to update users_courses.',

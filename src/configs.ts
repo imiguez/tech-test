@@ -5,8 +5,9 @@ export default () => ({
   storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.FIREBASE_APP_ID,
-  clientEmail: process.env.CLIENT_EMAIL,
-  privateKey: process.env.PRIVATE_KEY,
+
+  // clientEmail: process.env.CLIENT_EMAIL,
+  // privateKey: process.env.PRIVATE_KEY,
 
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,

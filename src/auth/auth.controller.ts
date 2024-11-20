@@ -1,16 +1,12 @@
-import { Controller, Post, Body, Res } from '@nestjs/common';
+import { Controller, Post, Body, Res, HttpCode } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { CookieOptions, Response } from 'express';
-import { ConfigService } from '@nestjs/config';
 import { Public } from './decorators/public.decorator';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private configService: ConfigService,
-    private readonly authService: AuthService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Public()
   @Post('sign-up')
@@ -25,11 +21,12 @@ export class AuthController {
       // secure: this.configService.get<string>('env') === 'prod',
     };
     res.cookie('session', session, options);
-    return 'User created.';
+    return { message: 'User created.' };
   }
 
   @Public()
   @Post('login')
+  @HttpCode(200)
   async login(
     @Res({ passthrough: true }) res: Response,
     @Body() createAuthDto: CreateAuthDto,
@@ -41,6 +38,6 @@ export class AuthController {
       // secure: this.configService.get<string>('env') === 'prod',
     };
     res.cookie('session', session, options);
-    return 'User logged.';
+    return { message: 'User logged.' };
   }
 }

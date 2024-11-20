@@ -65,7 +65,7 @@ export class CoursesService {
     }
   }
 
-  async create(createCourseDto: CreateCourseDto): Promise<number> {
+  async create(createCourseDto: CreateCourseDto): Promise<string> {
     try {
       const course = new Course();
       course.name = createCourseDto.name;

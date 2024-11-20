@@ -1,50 +1,96 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from '../auth.controller';
 import { AuthService } from '../auth.service';
-import { fn } from 'jest-mock';
-import { CreateAuthDto } from '../dto/create-auth.dto';
-import { Response } from 'express';
-import httpMocks from 'node-mocks-http';
-import { UsersModule } from 'src/users/users.module';
-import { FirebaseModule } from 'src/firebase/firebase.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import request, { Response } from 'supertest';
+import { mockedSignUpResponse } from 'src/__mocks__/data/auth.mocks';
+import { INestApplication } from '@nestjs/common';
+
+jest.mock('../auth.service');
 
 describe('AuthController', () => {
-  let controller: AuthController;
+  let app: INestApplication;
+  let response: Response;
 
-  const mockedAuthService = {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    login: fn((createAuthDto: CreateAuthDto) => ({
-      session: 'mocked_session',
-      expiresIn: 60 * 15 * 1000,
-    })),
-  };
-
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [UsersModule, FirebaseModule, TypeOrmModule],
       controllers: [AuthController],
       providers: [AuthService],
-    })
-      .overrideProvider(AuthService)
-      .useValue(mockedAuthService)
-      .compile();
+    }).compile();
 
-    controller = module.get<AuthController>(AuthController);
+    jest.clearAllMocks();
+    app = module.createNestApplication();
+    await app.init();
+    expect(module.get<AuthController>(AuthController)).toBeDefined();
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
+  afterEach(() => {
+    expect(response.headers['content-type']).toMatch('application/json');
   });
 
-  it('succesful login should return a User logged message', () => {
-    const mockExpressResponse = httpMocks.createResponse<Response>();
-    expect(
-      controller.login(mockExpressResponse, {
-        email: 'test@gmail.com',
-        password: '123456',
-      }),
-    ).toEqual('User logged.');
-    expect(mockExpressResponse.cookies.session).toBe('mocked_session');
+  afterAll(async () => {
+    jest.clearAllMocks();
+    await app.close();
+  });
+
+  describe('POST /sign-up', () => {
+    beforeAll(async () => {
+      response = await request(app.getHttpServer())
+        .post('/auth/sign-up')
+        .send({
+          email: 'test@gmail.com',
+          password: '123456',
+        })
+        .set('Accept', 'application/json');
+    });
+
+    it('should return a 201 status code', () => {
+      expect(response.status).toEqual(201);
+    });
+
+    it('should return a User created message', () => {
+      expect(response.body.message).toEqual('User created.');
+    });
+
+    it('should return an HttpOnly session cookie', () => {
+      expect(
+        response.headers['set-cookie'][0].includes(
+          `session=${mockedSignUpResponse().session}; Max-Age=${mockedSignUpResponse().expiresIn / 1000};`,
+        ),
+      ).toBeTruthy();
+      expect(
+        response.headers['set-cookie'][0].includes('HttpOnly'),
+      ).toBeTruthy();
+    });
+  });
+
+  describe('POST /login', () => {
+    beforeAll(async () => {
+      response = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({
+          email: 'test@gmail.com',
+          password: '123456',
+        })
+        .set('Accept', 'application/json');
+    });
+
+    it('should return a 200 status code', () => {
+      expect(response.status).toEqual(200);
+    });
+
+    it('should return a User logged message', () => {
+      expect(response.body.message).toEqual('User logged.');
+    });
+
+    it('should return an HttpOnly session cookie', () => {
+      expect(
+        response.headers['set-cookie'][0].includes(
+          `session=${mockedSignUpResponse().session}; Max-Age=${mockedSignUpResponse().expiresIn / 1000};`,
+        ),
+      ).toBeTruthy();
+      expect(
+        response.headers['set-cookie'][0].includes('HttpOnly'),
+      ).toBeTruthy();
+    });
   });
 });

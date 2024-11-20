@@ -25,16 +25,19 @@ export class AuthService {
   ) {
     const authDto = new CreateAuthDto();
     authDto.email = 'test@gmail.com';
-    this.usersRepository.findOneBy({ email: authDto.email }).then(async (user) => {
-      try {
-        if (!user) {
-          authDto.password = await hash('123456', 10);
-          await this.usersRepository.insert(authDto);
+    this.usersRepository
+      .findOneBy({ email: authDto.email })
+      .then(async (user) => {
+        try {
+          if (!user) {
+            authDto.password = await hash('123456', 10);
+            await this.usersRepository.insert(authDto);
+          }
+        } catch (error) {
+          console.log(error);
         }
-      } catch (error) {
-        console.log(error);
-      }
-    }).catch((e) => console.log(e));
+      })
+      .catch((e) => console.log(e));
   }
 
   async signUp(

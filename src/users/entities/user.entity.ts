@@ -9,7 +9,7 @@ export class User {
   @Column({ type: 'varchar', length: 150, unique: true })
   email: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', select: false })
   password: string;
 
   @OneToMany(() => UsersCourses, (usersCourses) => usersCourses.user, {
